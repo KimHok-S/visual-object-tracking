@@ -77,7 +77,7 @@ def main():
     kalman_filters = {}
     original_boxes = {}
     centroids = {}
-    setup_dict_id(kalman_filters, original_boxes, centroids, kalman_filters, 1)
+    setup_dict_id(original_boxes, centroids, kalman_filters, 1)
 
     dt = 0.1
     u_x, u_y, std_acc = 1, 1, 1
@@ -102,7 +102,7 @@ def main():
         assignments = hungarian_assignment(similarity_matrix, tracks, sigma_iou)
         tracks = update_tracks(max(tracks), assignments, len(frame2))
 
-        setup_dict_id(kalman_filters, original_boxes, centroids, kalman_filters, i)
+        setup_dict_id(original_boxes, centroids, kalman_filters, i)
         for j in range(len(tracks)):
             if tracks[j] in kalman_filters[i - 1].keys():
                 kalman_filters[i][tracks[j]] = kalman_filters[i - 1][tracks[j]]
