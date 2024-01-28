@@ -4,61 +4,12 @@ import numpy as np
 import pandas as pd
 import cv2
 from KalmanFilter import KalmanFilter
+from IoUTracker import iou, compute_similarity_matrix, hungarian_assignment, update_tracks
 from scipy.optimize import linear_sum_assignment
 
 
 def compute_centroid(bbox):
-    return (bbox[0] + (bbox[2] / 2), bbox[1] + (bbox[3] / 2))
-
-
-# bbox = (bb_left , bb_top), width, height
-def iou(bbox1, bbox2):
-    xA = max(bbox1[0][0], bbox2[0][0])
-    yA = max(bbox1[0][1], bbox2[0][1])
-    xB = min(bbox1[0][0] + bbox1[1], bbox2[0][0] + bbox2[1])
-    yB = min(bbox1[0][1] + bbox1[2], bbox2[0][1] + bbox2[2])
-
-    intersection = max(0, (xB - xA) * (yB - yA))
-
-    return intersection / ((bbox1[1] * bbox1[2]) + (bbox2[1] * bbox2[2]) - intersection)
-
-
-def compute_similarity_matrix(frame1, frame2):
-    similarity_matrix = np.zeros((len(frame1), len(frame2)))
-    for i in range(len(frame1)):
-        for j in range(len(frame2)):
-            bbox1 = ((frame1.iloc[i]['bb_left'], frame1.iloc[i]['bb_top']), frame1.iloc[i]['bb_width'], frame1.iloc[i]['bb_height'])
-            bbox2 = ((frame2.iloc[j]['bb_left'], frame2.iloc[j]['bb_top']), frame2.iloc[j]['bb_width'], frame2.iloc[j]['bb_height'])
-            similarity_matrix[i][j] = iou(bbox1, bbox2)
-    return similarity_matrix
-
-
-def hungarian_assignment(similarity_matrix, previous_tracks, sigma_iou):
-    clear_sim_matrix = similarity_matrix.copy()
-    for i in range(len(clear_sim_matrix)):
-        for j in range(len(clear_sim_matrix[i])):
-            if clear_sim_matrix[i][j] < sigma_iou:
-                clear_sim_matrix[i][j] = 0
-    rows, cols = linear_sum_assignment(-clear_sim_matrix)
-    assignments = []
-    for i in range(len(rows)):
-        if clear_sim_matrix[rows[i]][cols[i]] != 0:
-            assignments.append((cols[i], previous_tracks[rows[i]]))
-    return assignments
-
-
-def update_tracks(max_id, assignments, nb_obj):
-    updated_tracks = []
-    for i in range(nb_obj):
-        is_new = True
-        for col, id in assignments:
-            if i == col:
-                updated_tracks.append(id)
-                is_new = False
-        if is_new:
-            max_id += 1
-            updated_tracks.append(max_id)
-    return updated_tracks
+    return bbox[0] + (bbox[2] / 2), bbox[1] + (bbox[3] / 2)
 
 
 def centroid_to_box(centroid, width, height):
@@ -132,7 +83,6 @@ def main():
                 centroids[i][tracks[j]] = compute_centroid((frame2.iloc[j]['bb_left'], frame2.iloc[j]['bb_top'],
                                                             frame2.iloc[j]['bb_width'], frame2.iloc[j]['bb_height']))
                 kalman_filters[i][tracks[j]].update(centroids[i][tracks[j]])
-
 
         image = "ADL-Rundle-6/img1/" + str(int(frames[i])).zfill(6) + ".jpg"
         image = cv2.imread(image)

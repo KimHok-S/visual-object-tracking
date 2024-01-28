@@ -58,17 +58,17 @@ def hungarian_assignment(similarity_matrix, previous_tracks, sigma_iou):
 
 
 def update_tracks(max_id, assignments, nb_obj):
-    new_tracks = []
+    updated_tracks = []
     for i in range(nb_obj):
-        not_find = True
+        is_new = True
         for col, id in assignments:
             if i == col:
-                new_tracks.append(id)
-                not_find = False
-        if not_find:
+                updated_tracks.append(id)
+                is_new = False
+        if is_new:
             max_id += 1
-            new_tracks.append(max_id)
-    return new_tracks
+            updated_tracks.append(max_id)
+    return updated_tracks
 
 
 def display_boxes(boxes, labels, tracks):

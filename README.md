@@ -1,3 +1,3 @@
 # Projet MLVOT
-* Author: Léo Sron
+* Autheur: Léo Sron
 * Promotion SCIA 2024
