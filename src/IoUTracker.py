@@ -1,5 +1,5 @@
 import sys
-
+import os
 import numpy as np
 import pandas as pd
 import cv2
@@ -18,6 +18,7 @@ def iou(bbox1, bbox2):
     return intersection / ((bbox1[1] * bbox1[2]) + (bbox2[1] * bbox2[2]) - intersection)
 
 
+# compute the similarity matrix between two frames
 def compute_similarity_matrix(frame1, frame2):
     similarity_matrix = np.zeros((len(frame1), len(frame2)))
     for i in range(len(frame1)):
@@ -91,6 +92,12 @@ def frame_to_boxes(frame):
 
 
 def main():
+    # if the results file already exists, delete it
+    try:
+        os.remove('../results/results_TP3.txt')
+    except OSError:
+        pass
+
     tracking_method = sys.argv[1]
 
     det = pd.read_csv('../data/det/det.txt', sep=',', index_col=0)
@@ -98,6 +105,7 @@ def main():
     sigma_iou = 0.2
     tracks = update_tracks(0, [], len(det.loc[1]))
 
+    # main loop
     for i in range(1, len(frames)-1):
         frame1 = det.loc[i]
         frame2 = det.loc[i + 1]
@@ -113,6 +121,7 @@ def main():
         display_boxes(frame_to_boxes(frame2), frames[i + 1], tracks)
         cv2.waitKey(10)
 
+        # write results to file
         with open('../results/results_TP3.txt', 'a') as f:
             for col, id in assignments:
                 f.write(str(i) + ',' + str(id) + ',' + str(frame2.iloc[col]['bb_left']) + ',' +

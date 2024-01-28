@@ -1,5 +1,5 @@
 import sys
-
+import os
 import numpy as np
 import pandas as pd
 import cv2
@@ -12,11 +12,12 @@ def compute_centroid(bbox):
     return bbox[0] + (bbox[2] / 2), bbox[1] + (bbox[3] / 2)
 
 
+# convert centroid and bounding box dimensions into a bounding box
 def centroid_to_box(centroid, width, height):
     return (centroid[0] - (width / 2), centroid[1] - (height / 2)), width, height
 
 
-# original_boxes = {frame_nb: {id: (bb_width, bb_height)}}
+# convert centroids into a dataframe with bounding boxes informations
 def original_to_frame(original_boxes, centroids):
     frame = pd.DataFrame(columns=['bb_left', 'bb_top', 'bb_width', 'bb_height'])
     for id in original_boxes:
@@ -35,10 +36,19 @@ def setup_dict_id(kalman_boxes, original_boxes, centroids, kalman_filters, frame
 
 
 def main():
+    # if the results file already exists, delete it
+    try:
+        os.remove('../results/results_Kalman.txt')
+    except OSError:
+        pass
+
     det = pd.read_csv('../data/det/det.txt', sep=',', index_col=0)
     frames = det.index.unique()
     sigma_iou = 0.2
 
+    # centroids       =  {numero de la frame: {id du tracker: [x, y]}}
+    # original_boxes  =  {numero de la frame: {id du tracker: [w, h]}}
+    # kalman_filters  =  {numero de la frame: {id du tracker: KalmanFilter}}
     kalman_filters = {}
     original_boxes = {}
     centroids = {}
@@ -49,6 +59,7 @@ def main():
     x_std_meas = 0.1
     y_std_meas = 0.1
 
+    # init first frame
     tracks = update_tracks(0, [], len(det.loc[1]))
     for i in range(1, len(tracks) + 1):
         kalman_filters[1][i] = KalmanFilter(dt, u_x, u_y, std_acc, x_std_meas, y_std_meas)
@@ -58,6 +69,7 @@ def main():
                                             det.loc[1].iloc[i - 1]['bb_width'], det.loc[1].iloc[i - 1]['bb_height']))
         kalman_filters[1][i].update(centroids[1][i])
 
+    # main loop
     for i in range(2, len(frames)):
         frame1 = original_to_frame(original_boxes[i - 1], centroids[i - 1])
         frame2 = det.loc[i]
@@ -81,6 +93,7 @@ def main():
                                                             frame2.iloc[j]['bb_width'], frame2.iloc[j]['bb_height']))
                 kalman_filters[i][tracks[j]].update(centroids[i][tracks[j]])
 
+        # display
         image = "../data/img1/" + str(int(frames[i])).zfill(6) + ".jpg"
         image = cv2.imread(image)
         boxes = []
@@ -90,14 +103,15 @@ def main():
             cv2.putText(image, str(id), (int(boxes[-1][0][0]), int(boxes[-1][0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
         cv2.imshow('image', image)
         cv2.waitKey(10)
-'''
+
+        # write results
         with open('../results/results_Kalman.txt', 'a') as f:
             for j in range(len(boxes)):
                 f.write(str(i-1) + ',' + str(tracks[j]) + ',' + str(boxes[j][0][0]) + ',' +
                         str(boxes[j][0][1]) + ',' + str(boxes[j][1]) + ',' +
                         str(boxes[j][2]) + ',' + str(frame2.iloc[j]['conf']) + ',' +
                         str(frame2.iloc[j]['x']) + ',' + str(frame2.iloc[j]['y']) + ',' + str(frame2.iloc[j]['z']) + '\n')
-'''
+
 
 if __name__ == '__main__':
     main()
