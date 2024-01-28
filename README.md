@@ -222,4 +222,5 @@ ADL-Rundle-6                       4889      5009      940       24
 ```
 
 L'algorithme ayant les meilleurs résultats est celui du TP3 sans le filtre de Kalman. Il semblerait que le filtre de Kalman ait du mal à prédire la position des bounding boxes.
-Cela peut être dû aux détections contenues dans le fichier `det.txt` qui semble contenir des artéfacts. On peut notamment notifier des bounding boxes se téléportant d'un endroit à un autre et rétrécissant ou s'agrandissant de manière anormale.
+Cela peut être dû aux détections contenues dans le fichier `det.txt` qui semble contenir des artéfacts. On peut notamment remarquer des bounding boxes se téléportant d'un endroit à un autre et rétrécissant ou s'agrandissant de manière anormale.
+Cela peut également être dû à la façon dont j'ai enregistré les résultats dans le fichier `results_Kalman.txt`.
