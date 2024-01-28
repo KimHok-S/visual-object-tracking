@@ -16,7 +16,7 @@ Le projet est divisé en 5 parties:
 .
 ├── README.md
 ├── requirements.txt
-├── objTraking.png                  // Image pour le README
+├── report_images                   // Images pour le rapport
 ├── src
 │   ├── Detector.py
 │   ├── KalmanFilter.py
