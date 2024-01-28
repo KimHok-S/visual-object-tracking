@@ -38,11 +38,11 @@ Le projet est divisé en 5 parties:
 ```
 Le programme implémentant les TP2 et TP3 se trouve dans le fichier `IoUTracker.py`. Pour lancer le programme en utilisant un algorithme ou l'autre, il faut exécuter la commande suivante:
 ```
-python IoUTracker.py greedy (pour le TP2)
+python IoUTracker.py greedy
 ```
 ou
 ```
-python IoUTracker.py hungarian (pour le TP3)
+python IoUTracker.py hungarian
 ```
 
 ## TP1
@@ -50,7 +50,7 @@ Le filtre de Kalman est implémenté dans la classe `KalmanFilter.py`. Le détec
 Ainsi, avec les méthodes `predict()` et `update()`, on peut prédire la position de la boule dans la vidéo.  
 Le pogramme lance la vidéo avec le centre de la boule, l'estimation de la trajectoire et la prédiction de la trajectoire. Une ligne continue est tracée pour suivre le déplacement de la boule.
 
-![objTracking.png](objTracking.png)
+![objTracking.png](report_images/objTracking.png)
 
 ## TP2
 Le principe du tracking par intersection sur union (IoU) est de calculer le score d'intersection sur union entre les bounding boxes de deux images successives.  
@@ -60,7 +60,7 @@ Ensuite, l'association des trackers se fait en fonction de la matrice de similar
 Enfin, on met à jour les trackers avec la fonction `update_trackers()`.  
 Le programme lance la vidéo avec les bounding boxes des objets trackés et l'id du tracker associé.
 
-![IoUgreedy.png](IoUgreedy.png)
+![IoUgreedy.png](report_images/IoUgreedy.png)
 
 ### Algorithme glouton
 ```python
@@ -85,7 +85,7 @@ L'algorithme *hongrois* consiste à trouver l'association optimale entre les tra
 Pour ce faire, j'ai implémenté la fonction `hungarian_assignment()` en utilisant la librairie `scipy.optimize.linear_sum_assignment` qui permet de résoudre le problème d'association optimale.  
 L'algorithme principal reste le même que pour le TP2. C'est pour cette raison que j'ai décidé de regrouper les deux TP dans le même fichier `IoUTracker.py`.
 
-![IoUhungarian.png](IoUhungarian.png)
+![IoUhungarian.png](report_images/IoUhungarian.png)
 
 ### Algorithme hongrois
 ```python
@@ -141,7 +141,7 @@ Je peux grâce à ces dictionnaires:
 * prédire et mettre à jour la position des bounding boxes à partir des filtres de Kalman en accédant aux méthodes de la classe du TP1.
 * reconstruire les frames précédentes à partir de `centroids` et `original_boxes` afin de les utiliser pour calculer la matrice de similarité. (fonction `original_to_frame()`)
 
-![IoUKalman.png](IoUKalman.png)
+![IoUKalman.png](report_images/IoUKalman.png)
 
 ### Algorithme principal
 L'algorithme principal est le suivant:
@@ -185,3 +185,41 @@ On associe les trackers et les bounding boxes à l'aide de l'algorithme hongrois
 On met à jour les trackers et les filtres de Kalman.  
 Si un tracker n'est pas associé à une bounding box, on crée un nouveau filtre de Kalman pour ce tracker.
 Sinon, on récupère le filtre de Kalman associé au tracker et on le met à jour.
+
+## Benchmark
+L'évaluation des algorithmes de tracking se fait à l'aide du projet `TrackEval` disponible sur [GitHub](https://github.com/JonathonLuiten/TrackEval).
+
+Les algorithmes des TP2, TP3 et TP4 ont été lancé sur le jeu d'image MOT 15 ADL-Rundle-6.  
+Voici les résultats obtenus:
+* Pour le TP3:
+```
+HOTA: TP3-pedestrian               HOTA      DetA      AssA      DetRe     DetPr     AssRe     AssPr     LocA      OWTA      HOTA(0)   LocA(0)   HOTALocA(0)
+ADL-Rundle-6                       17.348    32.142    9.6975    41.008    50.694    10.097    61.661    75.15     19.728    25.149    63.154    15.882    
+
+CLEAR: TP3-pedestrian              MOTA      MOTP      MODA      CLR_Re    CLR_Pr    MTR       PTR       MLR       sMOTA     CLR_TP    CLR_FN    CLR_FP    IDSW      MT        PT        ML        Frag      
+ADL-Rundle-6                       16.011    71.73     21.322    51.108    63.179    4.1667    87.5      8.3333    1.563     2560      2449      1492      266       1         21        2         269       
+
+Identity: TP3-pedestrian           IDF1      IDR       IDP       IDTP      IDFN      IDFP      
+ADL-Rundle-6                       19.512    17.648    21.816    884       4125      3168      
+
+Count: TP3-pedestrian              Dets      GT_Dets   IDs       GT_IDs    
+ADL-Rundle-6                       4052      5009      454       24        
+```
+
+* Pour le TP4:
+```
+HOTA: TP4-pedestrian               HOTA      DetA      AssA      DetRe     DetPr     AssRe     AssPr     LocA      OWTA      HOTA(0)   LocA(0)   HOTALocA(0)
+ADL-Rundle-6                       10.739    26.139    4.5788    37.253    38.167    4.8665    56.428    70.114    12.904    19.863    53.207    10.569       
+
+CLEAR: TP4-pedestrian              MOTA      MOTP      MODA      CLR_Re    CLR_Pr    MTR       PTR       MLR       sMOTA     CLR_TP    CLR_FN    CLR_FP    IDSW      MT        PT        ML        Frag      
+ADL-Rundle-6                       -17.888   66.578    -11.04    43.282    44.344    0         91.667    8.3333    -32.353   2168      2841      2721      343         225       137       138       629       
+
+Identity: TP4-pedestrian           IDF1      IDR       IDP       IDTP      IDFN      IDFP      
+ADL-Rundle-6                       9.7191    9.6027    9.8384    481       4528      4408       
+
+Count: TP4-pedestrian              Dets      GT_Dets   IDs       GT_IDs    
+ADL-Rundle-6                       4889      5009      940       24           
+```
+
+L'algorithme ayant les meilleurs résultats est celui du TP3 sans le filtre de Kalman. Il semblerait que le filtre de Kalman ait du mal à prédire la position des bounding boxes.
+Cela peut être dû aux détections contenues dans le fichier `det.txt` qui semble contenir des artéfacts. On peut notamment notifier des bounding boxes se téléportant d'un endroit à un autre et rétrécissant ou s'agrandissant de manière anormale.
