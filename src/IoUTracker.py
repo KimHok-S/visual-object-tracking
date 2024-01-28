@@ -6,8 +6,13 @@ import cv2
 from scipy.optimize import linear_sum_assignment
 
 
-# bbox = (bb_left , bb_top), width, height
 def iou(bbox1, bbox2):
+    """
+    Computes the IoU between two bounding boxes
+    :param bbox1: Bounding box(bb_left , bb_top), width, height 
+    :param bbox2: bounding box (bb_left , bb_top), width, height
+    :return: IoU between the two bounding boxes
+    """
     xA = max(bbox1[0][0], bbox2[0][0])
     yA = max(bbox1[0][1], bbox2[0][1])
     xB = min(bbox1[0][0] + bbox1[1], bbox2[0][0] + bbox2[1])
@@ -18,8 +23,13 @@ def iou(bbox1, bbox2):
     return intersection / ((bbox1[1] * bbox1[2]) + (bbox2[1] * bbox2[2]) - intersection)
 
 
-# compute the similarity matrix between two frames
 def compute_similarity_matrix(frame1, frame2):
+    """
+    Computes the similarity matrix between two frames
+    :param frame1: Pandas dataframe of the first frame
+    :param frame2: Pandas dataframe of the second frame
+    :return: Similarity matrix between the two frames
+    """
     similarity_matrix = np.zeros((len(frame1), len(frame2)))
     for i in range(len(frame1)):
         for j in range(len(frame2)):
@@ -30,6 +40,13 @@ def compute_similarity_matrix(frame1, frame2):
 
 
 def greedy_assignment(similarity_matrix, previous_tracks, sigma_iou):
+    """
+    Assigns the tracks to the previous tracks using a greedy algorithm
+    :param similarity_matrix: Similarity matrix between two frames
+    :param previous_tracks: List of the previous tracks
+    :param sigma_iou: Threshold for the IoU
+    :return: List of the assignments
+    """
     assignments = []
     used_cols = []
     for i in range(similarity_matrix.shape[1]):
@@ -45,6 +62,13 @@ def greedy_assignment(similarity_matrix, previous_tracks, sigma_iou):
 
 
 def hungarian_assignment(similarity_matrix, previous_tracks, sigma_iou):
+    """
+    Assigns the tracks to the previous tracks using the Hungarian algorithm
+    :param similarity_matrix: Similarity matrix between two frames
+    :param previous_tracks: List of the previous tracks
+    :param sigma_iou: Threshold for the IoU
+    :return: List of the assignments
+    """
     clear_sim_matrix = similarity_matrix.copy()
     for i in range(len(clear_sim_matrix)):
         for j in range(len(clear_sim_matrix[i])):
@@ -59,6 +83,13 @@ def hungarian_assignment(similarity_matrix, previous_tracks, sigma_iou):
 
 
 def update_tracks(max_id, assignments, nb_obj):
+    """
+    Updates the tracks
+    :param max_id: The maximum id of the tracks
+    :param assignments: List of the assignments
+    :param nb_obj: Number of objects in the frame
+    :return: List of the updated tracks
+    """
     updated_tracks = []
     for i in range(nb_obj):
         is_new = True
@@ -73,6 +104,13 @@ def update_tracks(max_id, assignments, nb_obj):
 
 
 def display_boxes(boxes, labels, tracks):
+    """
+    Displays the bounding boxes on the image
+    :param boxes: Matrix of the bounding boxes
+    :param labels: Frame number
+    :param tracks: List of the tracks
+    :return: None
+    """
     image = "../data/img1/" + str(int(labels)).zfill(6) + ".jpg"
     image = cv2.imread(image)
     for i in range(len(boxes)):
@@ -82,6 +120,11 @@ def display_boxes(boxes, labels, tracks):
 
 
 def frame_to_boxes(frame):
+    """
+    Converts a frame to a matrix of bounding boxes
+    :param frame: Pandas dataframe of the frame
+    :return: Matrix of the bounding boxes
+    """
     boxes = np.zeros((len(frame), 4))
     for i in range(len(frame)):
         boxes[i][0] = frame.iloc[i]['bb_left']

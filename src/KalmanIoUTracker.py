@@ -9,16 +9,33 @@ from scipy.optimize import linear_sum_assignment
 
 
 def compute_centroid(bbox):
+    """
+    Computes the centroid of a bounding box
+    :param bbox: Bounding box (bb_left , bb_top, width, height)
+    :return: Centroid of the bounding box
+    """
     return bbox[0] + (bbox[2] / 2), bbox[1] + (bbox[3] / 2)
 
 
 # convert centroid and bounding box dimensions into a bounding box
 def centroid_to_box(centroid, width, height):
+    """
+    Converts the centroid and the dimensions of the bounding box to a bounding box
+    :param centroid: Dictionary containing the centroids of the bounding boxes
+    :param width: Width of the bounding box
+    :param height: Height of the bounding box
+    :return: Bounding box
+    """
     return (centroid[0] - (width / 2), centroid[1] - (height / 2)), width, height
 
 
-# convert centroids into a dataframe with bounding boxes informations
 def original_to_frame(original_boxes, centroids):
+    """
+    Converts the original boxes and centroids to a Pandas dataframe
+    :param original_boxes: Dictionary containing the width and height of the bounding boxes
+    :param centroids: Dictionary containing the centroids of the bounding boxes
+    :return: Pandas dataframe containing the bounding boxes
+    """
     frame = pd.DataFrame(columns=['bb_left', 'bb_top', 'bb_width', 'bb_height'])
     for id in original_boxes:
         bbox = centroid_to_box(centroids[id], original_boxes[id][0], original_boxes[id][1])
@@ -29,7 +46,15 @@ def original_to_frame(original_boxes, centroids):
     return frame
 
 
-def setup_dict_id(kalman_boxes, original_boxes, centroids, kalman_filters, frame_nb):
+def setup_dict_id(original_boxes, centroids, kalman_filters, frame_nb):
+    """
+    Setup the dictionaries for the frame number frame_nb
+    :param original_boxes: Dictionary containing the width and height of the bounding boxes
+    :param centroids: Dictionary containing the centroids of the bounding boxes
+    :param kalman_filters: Dictionary containing the Kalman filters
+    :param frame_nb: Number of the frame
+    :return: None
+    """
     original_boxes[frame_nb] = {}
     centroids[frame_nb] = {}
     kalman_filters[frame_nb] = {}
