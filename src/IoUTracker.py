@@ -72,7 +72,7 @@ def update_tracks(max_id, assignments, nb_obj):
 
 
 def display_boxes(boxes, labels, tracks):
-    image = "ADL-Rundle-6/img1/" + str(int(labels)).zfill(6) + ".jpg"
+    image = "../data/img1/" + str(int(labels)).zfill(6) + ".jpg"
     image = cv2.imread(image)
     for i in range(len(boxes)):
         cv2.rectangle(image, (int(boxes[i][0]), int(boxes[i][1])), (int(boxes[i][0] + boxes[i][2]), int(boxes[i][1] + boxes[i][3])), (0, 255, 0), 2)
@@ -93,7 +93,7 @@ def frame_to_boxes(frame):
 def main():
     tracking_method = sys.argv[1]
 
-    det = pd.read_csv('ADL-Rundle-6/det/det.txt', sep=',', index_col=0)
+    det = pd.read_csv('../data/det/det.txt', sep=',', index_col=0)
     frames = det.index.unique()
     sigma_iou = 0.2
     tracks = update_tracks(0, [], len(det.loc[1]))
@@ -113,9 +113,9 @@ def main():
         display_boxes(frame_to_boxes(frame2), frames[i + 1], tracks)
         cv2.waitKey(10)
 
-        with open('results.txt', 'a') as f:
+        with open('../results/results_TP3.txt', 'a') as f:
             for col, id in assignments:
-                f.write(str(frames[i + 1]) + ',' + str(id) + ',' + str(frame2.iloc[col]['bb_left']) + ',' +
+                f.write(str(i) + ',' + str(id) + ',' + str(frame2.iloc[col]['bb_left']) + ',' +
                         str(frame2.iloc[col]['bb_top']) + ',' + str(frame2.iloc[col]['bb_width']) + ',' +
                         str(frame2.iloc[col]['bb_height']) + ',' + str(frame2.iloc[col]['conf']) + ',' +
                         str(frame2.iloc[col]['x']) + ',' + str(frame2.iloc[col]['y']) + ',' + str(frame2.iloc[col]['z']) + '\n')

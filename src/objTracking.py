@@ -9,7 +9,7 @@ def main():
     x_std_meas = 0.1
     y_std_meas = 0.1
     karlman_filter = KalmanFilter(dt, u_x, u_y, std_acc, x_std_meas, y_std_meas)
-    cap = cv2.VideoCapture('TP1_data/randomball.avi')
+    cap = cv2.VideoCapture('../data/randomball.avi')
     centers = []
     prev_predicted = []
     prev_center = []

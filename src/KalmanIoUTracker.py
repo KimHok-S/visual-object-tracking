@@ -18,8 +18,6 @@ def centroid_to_box(centroid, width, height):
 
 # original_boxes = {frame_nb: {id: (bb_width, bb_height)}}
 def original_to_frame(original_boxes, centroids):
-    print("original_boxes", original_boxes)
-    print("centroids", centroids)
     frame = pd.DataFrame(columns=['bb_left', 'bb_top', 'bb_width', 'bb_height'])
     for id in original_boxes:
         bbox = centroid_to_box(centroids[id], original_boxes[id][0], original_boxes[id][1])
@@ -31,14 +29,13 @@ def original_to_frame(original_boxes, centroids):
 
 
 def setup_dict_id(kalman_boxes, original_boxes, centroids, kalman_filters, frame_nb):
-    kalman_boxes[frame_nb] = {}
     original_boxes[frame_nb] = {}
     centroids[frame_nb] = {}
     kalman_filters[frame_nb] = {}
 
 
 def main():
-    det = pd.read_csv('ADL-Rundle-6/det/det.txt', sep=',', index_col=0)
+    det = pd.read_csv('../data/det/det.txt', sep=',', index_col=0)
     frames = det.index.unique()
     sigma_iou = 0.2
 
@@ -84,7 +81,7 @@ def main():
                                                             frame2.iloc[j]['bb_width'], frame2.iloc[j]['bb_height']))
                 kalman_filters[i][tracks[j]].update(centroids[i][tracks[j]])
 
-        image = "ADL-Rundle-6/img1/" + str(int(frames[i])).zfill(6) + ".jpg"
+        image = "../data/img1/" + str(int(frames[i])).zfill(6) + ".jpg"
         image = cv2.imread(image)
         boxes = []
         for id in kalman_filters[i]:
@@ -93,7 +90,14 @@ def main():
             cv2.putText(image, str(id), (int(boxes[-1][0][0]), int(boxes[-1][0][1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
         cv2.imshow('image', image)
         cv2.waitKey(10)
-
+'''
+        with open('../results/results_Kalman.txt', 'a') as f:
+            for j in range(len(boxes)):
+                f.write(str(i-1) + ',' + str(tracks[j]) + ',' + str(boxes[j][0][0]) + ',' +
+                        str(boxes[j][0][1]) + ',' + str(boxes[j][1]) + ',' +
+                        str(boxes[j][2]) + ',' + str(frame2.iloc[j]['conf']) + ',' +
+                        str(frame2.iloc[j]['x']) + ',' + str(frame2.iloc[j]['y']) + ',' + str(frame2.iloc[j]['z']) + '\n')
+'''
 
 if __name__ == '__main__':
     main()
